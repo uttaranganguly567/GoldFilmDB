@@ -7,4 +7,8 @@ Technologies used -
 4. MongoDB
 5. IntelliJ IDEA
 
-This is a project I made for learning Spring Boot and React intensively. 
+This is a project I created to intensively learn Spring Boot and React. 
+
+Incomplete functionalities - 
+
+Reviews are not available. There is an issue with the POST request in the backend server.
