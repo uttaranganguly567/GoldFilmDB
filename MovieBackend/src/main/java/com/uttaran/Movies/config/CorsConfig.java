@@ -1,16 +1,23 @@
-package com.uttaran.Movies.config;
+package com.uttaran.movies.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class CorsConfig implements WebMvcConfigurer {
+
+    @Value("${CORS_ALLOWED_ORIGIN}")
+    private String allowedOrigin;
+
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**")
-                .allowedOrigins("http://localhost:3000") // Allow frontend origin
-                .allowedMethods("GET", "POST", "PUT", "DELETE") // Allowed HTTP methods
-                .allowedHeaders("*"); // Allowed headers
+        // This applies CORS to your whole API
+        registry.addMapping("/api/v1/**")
+                .allowedOrigins(allowedOrigin)
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowedHeaders("*")
+                .allowCredentials(true);
     }
 }
