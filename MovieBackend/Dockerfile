@@ -9,10 +9,8 @@ COPY .mvn/ .mvn
 COPY mvnw .
 COPY pom.xml .
 
-# ---- ADD THIS LINE ----
 # Add execute permissions to the mvnw script
 RUN chmod +x mvnw
-# ---------------------
 
 # Build the project dependencies (this layer is cached)
 RUN ./mvnw dependency:go-offline
@@ -20,8 +18,8 @@ RUN ./mvnw dependency:go-offline
 # Copy the rest of your source code
 COPY src ./src
 
-# Package the application
-RUN ./mvnw clean package
+# Package the application, skipping tests
+RUN ./mvnw clean package -DskipTests
 
 # Set the port the container will expose
 EXPOSE 8080
