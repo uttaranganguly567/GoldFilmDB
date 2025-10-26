@@ -11,7 +11,7 @@ This repository is a **monorepo** containing two separate projects:
 
 The application is deployed on Render:
 
-**[https://goldfilmdb-zj31.onrender.com/](https://www.google.com/search?q=https://goldfilmdb-zj31.onrender.com/)**
+**[https://goldfilmdb-zj31.onrender.com/](https://goldfilmdb-zj31.onrender.com)**
 
 *(Note: The backend is on a free Render plan, so it may take 30-60 seconds to "wake up" on the first load.)*
 
@@ -158,4 +158,4 @@ This application is configured for a monorepo deployment on Render.
 
 ## 👏 Acknowledgments & Credits
 
-  * **Project Author:** [Uttaran Ganguly](https://www.google.com/search?q=https://github.com/uttaranganguly567)
+  * **Project Author:** [Uttaran Ganguly](https://github.com/uttaranganguly567)
