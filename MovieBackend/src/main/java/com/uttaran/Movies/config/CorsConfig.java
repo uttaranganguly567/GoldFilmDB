@@ -1,4 +1,4 @@
-package com.uttaran.movies.config;
+package com.uttaran.Movies.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
