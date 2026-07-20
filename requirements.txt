@@ -2,6 +2,7 @@ fastapi
 uvicorn[standard]
 sqlalchemy
 psycopg2-binary
+pg8000
 python-dotenv
 pydantic
 jinja2
