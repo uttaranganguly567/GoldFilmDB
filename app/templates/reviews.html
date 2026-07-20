@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<style>
+    /* Blurred background movie backdrop overlay */
+    .backdrop-blur-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image: linear-gradient(to bottom, rgba(7, 8, 10, 0.75) 0%, #07080a 100%), var(--img);
+        background-size: cover;
+        background-position: center;
+        filter: blur(40px) brightness(0.2);
+        transform: scale(1.1);
+        z-index: -1;
+    }
+
+    .reviews-content-wrapper {
+        position: relative;
+        z-index: 10;
+        margin-top: 50px;
+        padding-bottom: 80px;
+    }
+
+    .movie-reviews-card {
+        background: rgba(15, 18, 24, 0.65);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 24px;
+        padding: 40px;
+        box-shadow: var(--glass-glow);
+    }
+
+    .movie-poster-reviews {
+        border-radius: 16px;
+        border: 1px solid rgba(255, 215, 0, 0.4);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 20px rgba(255, 215, 0, 0.1);
+        max-width: 100%;
+        height: auto;
+        transition: transform 0.3s ease;
+    }
+
+    .movie-poster-reviews:hover {
+        transform: scale(1.02);
+        border-color: var(--primary-gold);
+    }
+
+    /* Glass card items for reviews list */
+    .review-item-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 16px;
+        transition: all 0.3s ease;
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .review-item-card:hover {
+        background: rgba(255, 255, 255, 0.06);
+        border-color: rgba(255, 255, 255, 0.1);
+        transform: translateX(4px);
+    }
+
+    .review-user-meta {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--primary-gold);
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .review-body-text {
+        font-size: 1rem;
+        line-height: 1.6;
+        color: #e2e8f0;
+    }
+
+    /* Premium Form Styling */
+    .form-control-premium {
+        background: rgba(0, 0, 0, 0.35) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        color: white !important;
+        border-radius: 12px;
+        padding: 12px 16px;
+        transition: all 0.3s ease !important;
+        resize: none;
+    }
+
+    .form-control-premium:focus {
+        border-color: var(--primary-gold) !important;
+        box-shadow: 0 0 12px rgba(255, 215, 0, 0.2) !important;
+        background: rgba(0, 0, 0, 0.5) !important;
+    }
+
+    .form-label-gold {
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: var(--primary-gold);
+        margin-bottom: 10px;
+    }
+
+    .btn-back-nav {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: white;
+        text-decoration: none;
+        font-weight: 500;
+        margin-bottom: 25px;
+        transition: all 0.3s ease;
+        opacity: 0.8;
+    }
+
+    .btn-back-nav:hover {
+        color: var(--primary-gold);
+        opacity: 1;
+        transform: translateX(-4px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Fullscreen blurred background image block -->
+<div class="backdrop-blur-container" style="--img: url('{{ movie.backdrops[0] if movie.backdrops else movie.poster }}');"></div>
+
+<div class="container reviews-content-wrapper">
+    <!-- Navigation Back Link -->
+    <a href="/" class="btn-back-nav">
+        <i class="fa-solid fa-arrow-left"></i> Back to Movie Catalog
+    </a>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="movie-reviews-card">
+                <div class="row">
+                    <!-- Left column: poster representation -->
+                    <div class="col-md-4 text-center text-md-start mb-4 mb-md-0">
+                        <img class="movie-poster-reviews" src="{{ movie.poster }}" alt="{{ movie.title }}" />
+                        <h4 class="mt-3 font-weight-bold text-white">{{ movie.title }}</h4>
+                        <div class="mt-2 text-muted">
+                            <span class="badge bg-secondary px-2.5 py-1.5">{{ movie.release_date[:4] }}</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Right column: review lists & review entries -->
+                    <div class="col-md-8">
+                        <div class="row">
+                            <div class="col-12">
+                                <form hx-post="/api/v1/reviews" 
+                                      hx-target="#reviews-list" 
+                                      hx-swap="beforeend"
+                                      hx-on::after-request="this.reset()"
+                                      class="mb-4">
+                                    <div class="mb-3">
+                                        <label for="reviewTextarea" class="form-label form-label-gold">Write a Review!</label>
+                                        <textarea id="reviewTextarea" name="reviewBody" class="form-control form-control-premium" rows="3" placeholder="Share your thoughts about this movie..." required></textarea>
+                                        <input type="hidden" name="imdbId" value="{{ movie.imdb_id }}">
+                                    </div>
+                                    <button type="submit" class="btn btn-premium-fill">Submit Review</button>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-12">
+                                <hr style="border-color: rgba(255, 255, 255, 0.1);" />
+                            </div>
+                        </div>
+                        
+                        <!-- Dynamic review list container -->
+                        <div id="reviews-list">
+                            {% if movie.reviews %}
+                                {% for r in movie.reviews %}
+                                    {% include "review_list_fragment.html" %}
+                                {% endfor %}
+                            {% else %}
+                                <p id="no-reviews-fallback" class="text-muted text-center py-4">No reviews yet. Be the first to share your thoughts!</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,308 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<style>
+    .movie-carousel-container {
+        width: 100vw;
+        background-color: var(--dark-bg);
+        overflow: hidden;
+        position: relative;
+    }
+    
+    /* Make the carousel container cinematic and taller */
+    .movie-card-container {
+        height: 680px;
+        background-color: var(--dark-bg);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    /* Ken Burns active slide zoom animation */
+    .movie-card {
+        background-repeat: no-repeat;
+        height: 100%;
+        width: 100%;
+        background-size: cover;
+        background-position: center 20%;
+        background-image: linear-gradient(to bottom, rgba(7, 8, 10, 0.2) 0%, rgba(7, 8, 10, 0.6) 40%, rgba(7, 8, 10, 0.95) 85%, var(--dark-bg) 100%), var(--img);
+        transform: scale(1.03);
+        transition: transform 6s cubic-bezier(0.1, 1, 0.1, 1);
+    }
+    
+    .carousel-item.active .movie-card {
+        transform: scale(1);
+    }
+    
+    /* Centered cinematic detail layer */
+    .movie-detail {
+        position: absolute;
+        bottom: 80px;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: space-evenly;
+        align-items: center;
+        width: 80%;
+        margin: 0 auto;
+        z-index: 10;
+        background: rgba(15, 18, 24, 0.45);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid var(--glass-border);
+        border-radius: 24px;
+        padding: 40px;
+        box-shadow: var(--glass-glow), inset 0 0 20px rgba(255, 255, 255, 0.02);
+        animation: slideUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    
+    @keyframes slideUp {
+        from { transform: translateY(40px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+    
+    /* Premium Movie Poster with neon reflection border */
+    .movie-poster {
+        width: 200px;
+        height: 290px;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), 0 0 25px rgba(255, 215, 0, 0.15);
+        border: 1.5px solid rgba(255, 215, 0, 0.45);
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+    }
+    
+    .movie-poster:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 20px 45px rgba(0, 0, 0, 0.7), 0 0 35px rgba(255, 215, 0, 0.35);
+        border-color: var(--primary-gold);
+    }
+    
+    .movie-poster > img {
+        height: 100%;
+        width: 100%;
+        object-fit: cover;
+    }
+    
+    /* Movie Details Styling */
+    .movie-info-block {
+        flex: 1;
+        max-width: 45%;
+        padding: 0 30px;
+    }
+
+    .movie-title-header {
+        color: white;
+        font-weight: 800;
+        font-size: 2.2rem;
+        letter-spacing: -0.5px;
+        margin-bottom: 8px;
+        text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    }
+    
+    .movie-metadata {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+
+    .meta-badge {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #e2e8f0;
+        font-size: 0.8rem;
+        font-weight: 600;
+        padding: 4px 12px;
+        border-radius: 20px;
+    }
+
+    .meta-badge.gold {
+        border-color: rgba(255, 215, 0, 0.4);
+        color: var(--primary-gold);
+        background: rgba(255, 215, 0, 0.05);
+    }
+    
+    /* Interactive Button Elements */
+    .movie-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        align-items: center;
+        width: 180px;
+    }
+    .movie-actions a {
+        text-decoration: none !important;
+    }
+    
+    /* Glowing Play Button with Ripple Animation */
+    .btn-play-circle {
+        width: 80px;
+        height: 80px;
+        background: var(--gold-gradient, linear-gradient(135deg, #ffd700 0%, #ffaa00 100%));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #000;
+        font-size: 2rem;
+        box-shadow: 0 8px 25px rgba(255, 215, 0, 0.35);
+        cursor: pointer;
+        position: relative;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .btn-play-circle i {
+        margin-left: 5px; /* Offset alignment for play icon centering */
+    }
+
+    .btn-play-circle::after {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        border: 2px solid var(--primary-gold);
+        opacity: 0.6;
+        animation: playPulse 2s infinite ease-out;
+    }
+
+    @keyframes playPulse {
+        0% { transform: scale(1); opacity: 0.8; }
+        100% { transform: scale(1.6); opacity: 0; }
+    }
+
+    .btn-play-circle:hover {
+        transform: scale(1.1);
+        box-shadow: 0 12px 30px rgba(255, 215, 0, 0.55);
+        color: #000;
+    }
+
+    /* Glass Controls for Carousel Navigation */
+    .carousel-btn-glass {
+        width: 60px;
+        height: 60px;
+        background: rgba(15, 18, 24, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-radius: 50%;
+        top: 50%;
+        transform: translateY(-50%);
+        opacity: 0.7;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.25rem;
+    }
+
+    .carousel-btn-glass:hover {
+        background: rgba(15, 18, 24, 0.75);
+        border-color: rgba(255, 215, 0, 0.5);
+        color: var(--primary-gold);
+        opacity: 1;
+        transform: translateY(-50%) scale(1.1);
+        box-shadow: 0 0 20px rgba(255, 215, 0, 0.2), 0 8px 32px rgba(0, 0, 0, 0.6);
+    }
+
+    .carousel-btn-glass.carousel-control-prev {
+        left: 40px;
+    }
+
+    .carousel-btn-glass.carousel-control-next {
+        right: 40px;
+    }
+
+    @media only screen and (max-width: 992px) {
+        .movie-detail {
+            flex-direction: column;
+            width: 90%;
+            bottom: 40px;
+            padding: 24px;
+            gap: 20px;
+        }
+        .movie-info-block {
+            max-width: 100%;
+            text-align: center;
+            padding: 0;
+        }
+        .movie-title-header {
+            font-size: 1.8rem;
+        }
+        .movie-card-container {
+            height: 780px;
+        }
+        .movie-poster {
+            width: 150px;
+            height: 220px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="movie-carousel-container">
+    {% if not movies %}
+    <div class="text-center py-5">
+        <h4 class="text-muted">No movies found. Make sure to run `python seed.py` to seed the movie data.</h4>
+    </div>
+    {% else %}
+    <div id="movieCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="6000">
+        <div class="carousel-inner">
+            {% for movie in movies %}
+            <div class="carousel-item {% if loop.first %}active{% endif %}">
+                <div class="movie-card-container">
+                    <!-- Set backdrop background image -->
+                    <div class="movie-card" style="--img: url('{{ movie.backdrops[0] if movie.backdrops else movie.poster }}');"></div>
+                    
+                    <div class="movie-detail">
+                        <!-- Poster card component -->
+                        <div class="movie-poster" onclick="window.location.href='/movies/{{ movie.imdb_id }}'">
+                            <img src="{{ movie.poster }}" alt="{{ movie.title }}" />
+                        </div>
+                        
+                        <!-- Movie Metadata Information Block -->
+                        <div class="movie-info-block">
+                            <h2 class="movie-title-header">{{ movie.title }}</h2>
+                            <div class="movie-metadata">
+                                <span class="meta-badge gold">{{ movie.release_date[:4] }}</span>
+                                <span class="meta-badge"><i class="fa-brands fa-imdb text-warning me-1"></i> IMDb ID: {{ movie.imdb_id }}</span>
+                                {% for genre in movie.genres %}
+                                <span class="meta-badge">{{ genre }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <!-- Actions Trigger Block -->
+                        <div class="movie-actions">
+                            {% if movie.trailer_link %}
+                            <a href="/trailer/{{ movie.trailer_link[-11:] }}" class="btn-play-circle" title="Play Trailer">
+                                <i class="fa-solid fa-play"></i>
+                            </a>
+                            {% endif %}
+                            <a href="/movies/{{ movie.imdb_id }}" class="btn btn-premium-outline w-100 mt-2">
+                                <i class="fa-regular fa-comment-dots me-2"></i>Reviews
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Premium Navigation Arrows -->
+        <button class="carousel-control-prev carousel-btn-glass" type="button" data-bs-target="#movieCarousel" data-bs-slide="prev">
+            <i class="fa-solid fa-chevron-left"></i>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next carousel-btn-glass" type="button" data-bs-target="#movieCarousel" data-bs-slide="next">
+            <i class="fa-solid fa-chevron-right"></i>
+            <span class="visually-hidden">Next</span>
+        </button>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

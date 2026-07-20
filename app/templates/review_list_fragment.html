@@ -1,0 +1,13 @@
+<div class="review-item-card">
+    <div class="review-user-meta">
+        <i class="fa-solid fa-circle-user text-warning"></i> Anonymous Critic
+    </div>
+    <div class="review-body-text">{{ r.body }}</div>
+</div>
+
+<script>
+    var fallback = document.getElementById("no-reviews-fallback");
+    if (fallback) {
+        fallback.remove();
+    }
+</script>
