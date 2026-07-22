@@ -1,5 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.pool import NullPool
 from dotenv import load_dotenv
 import os
 
@@ -16,7 +17,17 @@ if DATABASE_URL.startswith("postgres://"):
 elif DATABASE_URL.startswith("postgresql://"):
     DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+pg8000://", 1)
 
-engine = create_engine(DATABASE_URL)
+connect_args = {}
+if "pg8000" in DATABASE_URL:
+    import ssl
+    # Enable SSL for pg8000 (Supabase pooler requires SSL)
+    ssl_context = ssl.create_default_context()
+    ssl_context.check_hostname = False
+    ssl_context.verify_mode = ssl.CERT_NONE  # Skip server certificate verification in serverless environments
+    connect_args["ssl_context"] = ssl_context
+
+engine = create_engine(DATABASE_URL, connect_args=connect_args, poolclass=NullPool)
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 

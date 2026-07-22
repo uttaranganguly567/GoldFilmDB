@@ -9,13 +9,20 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from sqlalchemy.orm import Session
 import os
+import sys
 
-# Changed from relative imports to absolute imports since main.py is at the root
+# Ensure root directory is in sys.path for Vercel serverless environment
+root_dir = os.path.abspath(os.path.dirname(__file__))
+if root_dir not in sys.path:
+    sys.path.insert(0, root_dir)
+
 from app import models, schemas, crud
 from app.database import engine, get_db
 
+
 # Create tables on startup (safe no-op if they already exist)
-models.Base.metadata.create_all(bind=engine)
+# Removed for Vercel/Supabase transaction pooler compatibility (poolers do not support DDL commands like CREATE TABLE)
+# models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="GoldFilmDB API",
@@ -84,7 +91,7 @@ def get_single_movie(imdb_id: str, db: Session = Depends(get_db)):
 
 
 @app.post("/api/v1/reviews")
-def create_review(
+async def create_review(
     request: Request,
     db: Session = Depends(get_db),
     # Support JSON requests or URL-encoded form submissions from HTMX
@@ -115,16 +122,8 @@ def create_review(
         )
     
     # Otherwise assume it's a JSON request from standard client
-    # We parse the body manually to avoid signature conflicts
     try:
-        import json
-        async def parse_json():
-            body = await request.body()
-            return json.loads(body)
-        
-        # FastAPI handles run-sync execution for body reading
-        import asyncio
-        payload = asyncio.run(request.json())
+        payload = await request.json()
         review_body = payload.get("reviewBody")
         imdb_id = payload.get("imdbId")
     except Exception:
@@ -134,3 +133,4 @@ def create_review(
     if not review:
         raise HTTPException(status_code=404, detail="Movie not found")
     return {"id": review.id, "body": review.body}
+
